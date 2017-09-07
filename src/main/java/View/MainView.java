@@ -1,8 +1,12 @@
 package View;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.GridLayout;
+import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -44,6 +48,7 @@ public class MainView {
 		panel = new JPanel();
 		panel2 = new JPanel();
 		panel2.setLayout(new BorderLayout());
+
 		panel3 = new JPanel();
 		panel3.setLayout(new GridLayout(6, 7));
 		frame.add(panel);
@@ -198,20 +203,24 @@ public class MainView {
 		this.showmonth(mycalemdar.getStamonth());
 
 		panel.add(ce, BorderLayout.SOUTH);
-		
-		
-		
-		
-		
+
 		for (final JButton i : button) {
 			i.addActionListener(new ActionListener() {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					if (!i.getText().equals("")) {
-						ta.setText("");
-						framepop.setVisible(true);
 						event = bm.getText() + " " + i.getText();
+						if (!mycalemdar.searchDB(event).equals("")) {
+							ta.setText(mycalemdar.searchDB(event).split(":")[1]);
+							framepop.setVisible(true);
+							mycalemdar.deleteDB(event);
+							
+						} else {
+							ta.setText("");
+							framepop.setVisible(true);
+						}
+
 					}
 
 				}
@@ -219,7 +228,7 @@ public class MainView {
 		}
 
 		frame.setVisible(true);
-		en = new  JLabel("Enter your note :");
+		en = new JLabel("Enter your note :");
 		framepop = new JFrame("Your Event");
 		panelpop = new JPanel();
 		ta = new JTextArea("");
@@ -227,7 +236,7 @@ public class MainView {
 		panelpop.setLayout(new BorderLayout());
 		panelpop.add(ta, BorderLayout.CENTER);
 		panelpop.add(sm, BorderLayout.SOUTH);
-		panelpop.add(en,BorderLayout.NORTH);
+		panelpop.add(en, BorderLayout.NORTH);
 		framepop.add(panelpop);
 		// framepop.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		framepop.setPreferredSize(new Dimension(300, 300));
@@ -240,8 +249,11 @@ public class MainView {
 			public void actionPerformed(ActionEvent e) {
 				framepop.setVisible(false);
 				if (!(ta.getText().equals(""))) {
-					System.out.println(ta.getText());
-					mycalemdar.addEvent(event + " : " + ta.getText(), 0);
+
+					// mycalemdar.addEvent(event + " : " + ta.getText(), 0);
+					// System.out.println(event+" "+ta.getText());
+					// System.out.println(ta.getText());
+					mycalemdar.addEventdb(event + " :" + ta.getText());
 				}
 			}
 		});
@@ -265,7 +277,8 @@ public class MainView {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				frameevent.setVisible(true);
-				tae.setText(mycalemdar.showEvent(mycalemdar.getStamonth()));
+
+				tae.setText(mycalemdar.showEventDB(mycalemdar.getStamonth()));
 
 			}
 		});

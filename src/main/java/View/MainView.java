@@ -30,13 +30,13 @@ import Model.Calendar;
 
 public class MainView {
 	JFrame frame, framepop, frameevent;
-	JPanel panel, panel2, panel22, panel3, panelpop, panelevent, panelbut;
+	JPanel panel, panel2, panel22, panel3, panelpop, panelevent, panelbut, sma;
 	JButton d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23,
 			d24, d25, d26, d27, d28, d29, d30, d31, d32, d33, d34, d35, d36, d37, d38, d39, d40, d41, d42;
 	ArrayList<JButton> button;
 	JScrollPane jsc;
 	JTextArea ta, tae;
-	JButton bm, next, back, sm, done, ce;
+	JButton bm, next, back, sm, done, ce, smd;
 	Calendar mycalemdar;
 	String event;
 	JComboBox<String> jcomm, jcomy, jth, jtm;
@@ -44,12 +44,13 @@ public class MainView {
 	int month;
 	int year;
 	String time;
+	String day;
 
 	public MainView(Calendar calendar) {
 
 		DateFormat dateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-
 		Date myTime = new Date();
+
 		month = (myTime.getMonth() + 1);
 		year = Integer.parseInt(myTime.toString().split(" ")[myTime.toString().split(" ").length - 1]);
 		System.out.println(year + "<<<<<<<<");
@@ -262,20 +263,19 @@ public class MainView {
 
 		en = new JLabel("Enter your note :");
 		framepop = new JFrame("Your Event");
-
 		panelpop = new JPanel();
 		jtm = new JComboBox<>();
 		jth = new JComboBox<>();
 
-		for (int i = 1; i <= 24; i++) {
+		for (int i = 1; i <= 23; i++) {
 			if (i < 10) {
 				jth.addItem("0" + i);
 			} else {
 				jth.addItem(i + "");
 			}
 		}
-		for(int i = 1 ; i <=60;i++){
-			if (i<10) {
+		for (int i = 1; i <= 59; i++) {
+			if (i < 10) {
 				jtm.addItem("0" + i);
 			} else {
 				jtm.addItem(i + "");
@@ -287,16 +287,63 @@ public class MainView {
 		jj.add(jtm);
 		ta = new JTextArea("");
 		sm = new JButton("submit");
+		sma = new JPanel();
+		sma.setLayout(new GridLayout(2, 1));
+		sma.add(sm);
+		smd = new JButton("Diary");
+		sma.add(smd);
+
 		panelpop.setLayout(new BorderLayout());
 		panelpop.add(ta, BorderLayout.CENTER);
-		panelpop.add(sm, BorderLayout.SOUTH);
+		panelpop.add(jj, BorderLayout.SOUTH);
 		panelpop.add(en, BorderLayout.NORTH);
-		panelpop.add(jj, BorderLayout.EAST);
+		panelpop.add(sma, BorderLayout.EAST);
 		framepop.add(panelpop);
 		// framepop.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		framepop.setPreferredSize(new Dimension(300, 300));
 		framepop.setSize(300, 300);
 		framepop.setVisible(false);
+
+		jth.setSelectedItem(myTime.toString().split(" ")[3].substring(0, 5).split(":")[0]);
+		jtm.setSelectedItem(myTime.toString().split(" ")[3].substring(0, 5).split(":")[1]);
+		jth.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				event = event.substring(0, event.split(":")[0].length() - 2) + jth.getSelectedItem().toString() + ":"
+						+ jtm.getSelectedItem().toString();
+
+				if (!mycalemdar.searchDB(event).equals("")) {
+
+					ta.setText(mycalemdar.searchDB(event).split(" :")[1]);
+					mycalemdar.deleteDB(event);
+
+				} else {
+					ta.setText("");
+				}
+
+			}
+		});
+
+		jtm.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				event = event.substring(0, event.split(":")[0].length() - 2) + jth.getSelectedItem().toString() + ":"
+						+ jtm.getSelectedItem().toString();
+
+				if (!mycalemdar.searchDB(event).equals("")) {
+
+					ta.setText(mycalemdar.searchDB(event).split(" :")[1]);
+					mycalemdar.deleteDB(event);
+
+				} else {
+					ta.setText("");
+				}
+
+			}
+		});
 
 		for (final JButton i : button) {
 			i.addActionListener(new ActionListener() {
@@ -306,14 +353,18 @@ public class MainView {
 					if (!i.getText().equals("")) {
 						Date date = new Date();
 						System.out.println(date);
+						day = i.getText();
+						System.out.println(day);
+
+						// System.out.println(event);
+						// jth.setSelectedItem(date.toString().split("
+						// ")[3].substring(0, 5).split(":")[0]);
+						// jtm.setSelectedItem(date.toString().split("
+						// ")[3].substring(0, 5).split(":")[1]);
 
 						event = jcomm.getSelectedItem() + " " + i.getText() + " " + jcomy.getSelectedItem() + " "
-								+ date.toString().split(" ")[3].substring(0, 5);
-						System.out.println(event);
-						jth.setSelectedItem(date.toString().split(" ")[3].substring(0, 5).split(":")[0]);
-						jtm.setSelectedItem(date.toString().split(" ")[3].substring(0, 5).split(":")[1]);
+								+ jth.getSelectedItem().toString() + ":" + jtm.getSelectedItem().toString();
 						if (!mycalemdar.searchDB(event).equals("")) {
-
 							ta.setText(mycalemdar.searchDB(event).split(" :")[1]);
 							framepop.setVisible(true);
 							mycalemdar.deleteDB(event);
@@ -336,11 +387,34 @@ public class MainView {
 				framepop.setVisible(false);
 				if (!(ta.getText().equals(""))) {
 
-					// mycalemdar.addEvent(event + " : " + ta.getText(), 0);
-					// System.out.println(event+" "+ta.getText());
-					// System.out.println(ta.getText());
+					// event = event.substring(0,
+					// event.split(":")[0].length()+3)+" "
+					// +
+					// jth.getSelectedItem().toString()+":"+jtm.getSelectedItem().toString();
 
+					System.out.println(event + " :" + ta.getText());
 					mycalemdar.addEventdb(event + " :" + ta.getText());
+
+				}
+			}
+		});
+
+		smd.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				DateFormat dateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+				Date date;
+
+				try {
+					date = dateTimeFormat.parse(day + "/" + month + "/" + year + " " + jth.getSelectedItem().toString()
+							+ ":" + jtm.getSelectedItem().toString());
+					if (!ta.getText().equals("")) {
+						mycalemdar.addDiary(date.getDay(), (event + " :" + ta.getText()));
+					}
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 			}
 		});
@@ -349,8 +423,8 @@ public class MainView {
 		tae = new JTextArea();
 		jsc = new JScrollPane(tae);
 		// frameevent.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frameevent.setPreferredSize(new Dimension(300, 600));
-		frameevent.setSize(300, 600);
+		frameevent.setPreferredSize(new Dimension(400, 600));
+		frameevent.setSize(400, 600);
 		panelevent = new JPanel();
 		panelevent.setLayout(new BorderLayout());
 		panelevent.add(jsc);
@@ -365,7 +439,7 @@ public class MainView {
 			public void actionPerformed(ActionEvent e) {
 				frameevent.setVisible(true);
 
-				tae.setText(mycalemdar.showEventDB((String) jcomm.getSelectedItem(),
+				tae.setText(mycalemdar.showshow((String) jcomm.getSelectedItem(),
 						Integer.parseInt(jcomy.getSelectedItem().toString())));
 
 			}

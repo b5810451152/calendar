@@ -7,17 +7,23 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Year;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Calendar {
 	private ArrayList<String> month;
 	private String stamonth = "January";
-	
+
 	private ArrayList<Integer> daymonth;
 	private ArrayList<Integer> daymonthl;
 
 	public Calendar() {
-//		event = new ArrayList<>();
+
+		// event = new ArrayList<>();
 		month = new ArrayList<>();
 		daymonth = new ArrayList<>();
 
@@ -48,7 +54,7 @@ public class Calendar {
 		daymonth.add(31);
 		daymonth.add(30);
 		daymonth.add(31);
-		
+
 		daymonthl.add(31);
 		daymonthl.add(29);
 		daymonthl.add(31);
@@ -86,9 +92,7 @@ public class Calendar {
 
 	}
 
-
-
-	public String showEventDB(String m,int year) {
+	public String showshow(String m, int year) {
 		String r = "";
 		try {
 			// setup
@@ -100,41 +104,101 @@ public class Calendar {
 				DatabaseMetaData dm = (DatabaseMetaData) conn.getMetaData();
 				System.out.println(m);
 
-				String query = "select * from events where month = '" + m + "' and year = "+year+" order by day";
+				String query = "select * from events where month = '" + m + "' and year = " + year + " order by day";
 				Statement statement = conn.createStatement();
 				ResultSet resultset = statement.executeQuery(query);
-				
+
 				while (resultset.next()) {
 					String month = resultset.getString(1);
 					int day = resultset.getInt(2);
 					int y = resultset.getInt(3);
-					String note = ": "+resultset.getString(5);
+					String note = ": " + resultset.getString(5);
 					String time = resultset.getString(4);
-					String str = "";	
-					
+					String str = "";
+
+					if (!str.equals("")) {
+						note = str;
+					}
+					// r += month + " " + day + " "+y+" " +time+" "+ note +
+					// "\n===========================\n";
+					String mm = (month + " " + day + " " + y + "  " + time);
+					r += mm + "\n";
+
+					for (String i : note.split("\n")) {
+						r += String.format("%40s", "") + "   " + i + "\n";
+					}
+					r += "=======================================\n";
+
+					// System.out.println(mm+" **********");
+					// r += ;
+
+				}
+				resultset.close();
+				statement.close();
+
+			}
+			conn.close();
+
+		} catch (
+
+		ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		if (!r.equals("")) {
+			System.out.println(r + " return");
+			return r;
+		}
+		return "You don't have events in this month";
+
+	}
+
+	public String showEventDB(String m, int year) {
+		String r = "";
+		try {
+			// setup
+			Class.forName("org.sqlite.JDBC");
+			String dbURL = "jdbc:sqlite:celendar.db";
+			Connection conn = DriverManager.getConnection(dbURL);
+			if (conn != null) {
+
+				DatabaseMetaData dm = (DatabaseMetaData) conn.getMetaData();
+				System.out.println(m);
+
+				String query = "select * from events where month = '" + m + "' and year = " + year + " order by day";
+				Statement statement = conn.createStatement();
+				ResultSet resultset = statement.executeQuery(query);
+
+				while (resultset.next()) {
+					String month = resultset.getString(1);
+					int day = resultset.getInt(2);
+					int y = resultset.getInt(3);
+					String note = ": " + resultset.getString(5);
+					String time = resultset.getString(4);
+					String str = "";
 
 					if (note.split("\n").length > 1) {
-						str+=" "+note.split("\n")[0]+"\n";
+						str += " " + note.split("\n")[0] + "\n";
 						for (int j = 1; j < note.split("\n").length; j++) {
-							for (int i = 0; i < 18 ; i++) {
-								
-								str+=" ";
+							for (int i = 0; i < 18; i++) {
+
+								str += " ";
 							}
-							if(j==note.split("\n").length-1){
-								str+=": "+note.split("\n")[j];
+							if (j == note.split("\n").length - 1) {
+								str += ": " + note.split("\n")[j];
+							} else {
+								str += ": " + note.split("\n")[j] + "\n";
 							}
-							else{
-								str+=": "+note.split("\n")[j]+"\n";
-							}
-							
+
 						}
-						
+
 					}
-					if(!str.equals("")){
-						note =str;
+					if (!str.equals("")) {
+						note = str;
 					}
-					r += month + " " + day + " "+y+"  " +time+" "+ note + "\n===========================\n";
-				
+					r += month + " " + day + " " + y + "  " + time + " " + note + "\n===========================\n";
+
 				}
 				resultset.close();
 				statement.close();
@@ -165,12 +229,13 @@ public class Calendar {
 			if (conn != null) {
 
 				DatabaseMetaData dm = (DatabaseMetaData) conn.getMetaData();
-				String query = "select * from events";
+				// String query = "select * from events";
 				Statement statement = conn.createStatement();
 				statement.execute("insert into events\nvalues ('" + x.split(" ")[0] + "',"
-						+ Integer.parseInt(x.split(" ")[1]) +","+Integer.parseInt(x.split(" ")[2])+",'"+x.split(" ")[3]+ "','" + x.split(":")[2] + "')");
-				ResultSet resultset = statement.executeQuery(query);
-				resultset.close();
+						+ Integer.parseInt(x.split(" ")[1]) + "," + Integer.parseInt(x.split(" ")[2]) + ",'"
+						+ x.split(" ")[3] + "','" + x.split(":")[2] + "')");
+				// ResultSet resultset = statement.executeQuery(query);
+				// resultset.close();
 				statement.close();
 
 			}
@@ -181,6 +246,63 @@ public class Calendar {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+
+	}
+
+	public void addDiary(int day, String x) {
+		try {
+			// setup
+			Class.forName("org.sqlite.JDBC");
+			String dbURL = "jdbc:sqlite:celendar.db";
+			Connection conn = DriverManager.getConnection(dbURL);
+			if (conn != null) {
+
+				DatabaseMetaData dm = (DatabaseMetaData) conn.getMetaData();
+				DateFormat dateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+				
+				Date date;
+				
+				int m = 1 ;
+
+				Statement statement = conn.createStatement();
+	
+				for (int i : getDaymonth(Integer.parseInt(x.split(" ")[2]))) {
+					
+					for (int j = 1; j <= i; j++) {
+
+						try {
+							date = dateTimeFormat.parse(j + "/" + m + "/" + Integer.parseInt(x.split(" ")[2]) + " "
+									+ x.split(" ")[3]);
+							if(date.getDay()==day){
+								statement.execute("insert into events\nvalues ('"+getMonth(m-1)+"',"+j+","+x.split(" ")[2]+",'"+x.split(" ")[3]+"','"+x.split(" :")[1]+"')");
+							}
+							
+							
+						} catch (NumberFormatException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
+					}
+					m+=1;
+
+				}
+
+				statement.close();
+
+			}
+			conn.close();
+
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		System.out.println(x+"     EVENT");
+		System.out.println(getDaymonth(Integer.parseInt(x.split(" ")[2])));
 
 	}
 
@@ -195,7 +317,7 @@ public class Calendar {
 				// System.out.println("Delete from events where month =
 				// '"+event.split(" ")[0]+"' and day = "+event.split(" ")[1]);
 				String query = "Delete from events where month = '" + event.split(" ")[0] + "' and day ="
-						+ event.split(" ")[1]+ " and year = "+event.split(" ")[2];
+						+ event.split(" ")[1] + " and year = " + event.split(" ")[2];
 				Statement statement = conn.createStatement();
 				statement.execute(query);
 
@@ -214,6 +336,7 @@ public class Calendar {
 
 	public String searchDB(String event) {
 		String r = "";
+		System.out.println(event + " oooooooo");
 
 		try {
 			// setup
@@ -223,11 +346,14 @@ public class Calendar {
 			if (conn != null) {
 
 				DatabaseMetaData dm = (DatabaseMetaData) conn.getMetaData();
-				System.out.println("select * from events where month = '" + event.split(" ")[0] + "' and day = "
-						+ event.split(" ")[1]+" and year = "+ event.split(" ")[2]);
+				// System.out.println("select * from events where month = '" +
+				// event.split(" ")[0] + "' and day = "
+				// + event.split(" ")[1] + " and year = " + event.split("
+				// ")[2]);
 
 				String query = "select * from events where month = '" + event.split(" ")[0] + "' and day ="
-						+ event.split(" ")[1]+" and year ="+ event.split(" ")[2];
+						+ event.split(" ")[1] + " and year =" + event.split(" ")[2] + " and time = '"
+						+ event.split(" ")[3] + "'";
 				Statement statement = conn.createStatement();
 				ResultSet resultset = statement.executeQuery(query);
 
@@ -237,7 +363,7 @@ public class Calendar {
 					int year = resultset.getInt(3);
 					String time = resultset.getString(4);
 					String note = resultset.getString(5);
-					r += month + " " + day + " "+year+" "+time+" :"+ note ;
+					r += month + " " + day + " " + year + " " + time + " :" + note;
 
 				}
 				resultset.close();
@@ -259,13 +385,13 @@ public class Calendar {
 
 	}
 
-
 	public ArrayList<String> getMonth() {
 		return month;
 	}
-	public String getMonth(int i){
+
+	public String getMonth(int i) {
 		return month.get(i);
-		
+
 	}
 
 	public void setMonth(ArrayList<String> month) {
@@ -280,13 +406,12 @@ public class Calendar {
 		this.stamonth = stamonth;
 	}
 
-
 	public ArrayList<Integer> getDaymonth(int year) {
-		if((year%4==0 && year%100!=0 ) || year%400 ==0 ){
-	
-			return daymonthl;	
+		if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
+
+			return daymonthl;
 		}
-	
+
 		return daymonth;
 	}
 

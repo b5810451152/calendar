@@ -218,6 +218,73 @@ public class Calendar {
 		}
 		return "You don't have events in this month";
 	}
+	
+	
+		public String searchBar(String m) {
+			String r = "";
+			try {
+				// setup
+				Class.forName("org.sqlite.JDBC");
+				String dbURL = "jdbc:sqlite:celendar.db";
+				Connection conn = DriverManager.getConnection(dbURL);
+				if (conn != null) {
+
+					DatabaseMetaData dm = (DatabaseMetaData) conn.getMetaData();
+					System.out.println(m);
+
+					String query = "select * from events where note like '%"+m+"%'";
+					Statement statement = conn.createStatement();
+					ResultSet resultset = statement.executeQuery(query);
+
+					while (resultset.next()) {
+						String month = resultset.getString(1);
+						int day = resultset.getInt(2);
+						int y = resultset.getInt(3);
+						String note = ": " + resultset.getString(5);
+						String time = resultset.getString(4);
+						String str = "";
+
+						if (note.split("\n").length > 1) {
+							str += " " + note.split("\n")[0] + "\n";
+							for (int j = 1; j < note.split("\n").length; j++) {
+								for (int i = 0; i < 18; i++) {
+
+									str += " ";
+								}
+								if (j == note.split("\n").length - 1) {
+									str += ": " + note.split("\n")[j];
+								} else {
+									str += ": " + note.split("\n")[j] + "\n";
+								}
+
+							}
+
+						}
+						if (!str.equals("")) {
+							note = str;
+						}
+						r += month + " " + day + " " + y + "  " + time + " " + note + "\n===========================\n";
+						System.out.println(r+"     THIS IS SEARCHBAR");
+					}
+					resultset.close();
+					statement.close();
+
+				}
+				conn.close();
+
+			} catch (
+
+			ClassNotFoundException e) {
+				e.printStackTrace();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			if (!r.equals("")) {
+				return r;
+			}
+			return "No event";
+		}
+	
 
 	public void addEventdb(String x) {
 
@@ -336,7 +403,7 @@ public class Calendar {
 
 	public String searchDB(String event) {
 		String r = "";
-		System.out.println(event + " oooooooo");
+		
 
 		try {
 			// setup

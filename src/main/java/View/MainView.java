@@ -24,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.border.Border;
 
 import Model.Calendar;
@@ -50,18 +51,11 @@ public class MainView {
 
 		DateFormat dateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 		Date myTime = new Date();
-
 		month = (myTime.getMonth() + 1);
 		year = Integer.parseInt(myTime.toString().split(" ")[myTime.toString().split(" ").length - 1]);
-		System.out.println(year + "<<<<<<<<");
-		System.out.println(month + "<<<<<<<<");
-		System.out.println(myTime);
 		time = myTime.toString().split(" ")[3].substring(0, 5);
-		System.out.println(time);
-
 		this.mycalemdar = calendar;
 		button = new ArrayList<>();
-
 		panelbut = new JPanel();
 		jcomm = new JComboBox<>();
 		jcomy = new JComboBox<>();
@@ -92,7 +86,6 @@ public class MainView {
 
 		jcomm.setSelectedItem(mycalemdar.getMonth(month - 1));
 		jcomy.setSelectedItem(year + "");
-
 		jcomm.addActionListener(new ActionListener() {
 
 			@Override
@@ -102,8 +95,7 @@ public class MainView {
 				//
 
 				showcalendar(mycalemdar.getMonth().indexOf(jcomm.getSelectedItem().toString()) + 1, year, time);
-				System.out.println(month + "<<<<<");
-				System.out.println(month + " " + year + "<<<<<<<");
+
 			}
 
 		});
@@ -114,22 +106,31 @@ public class MainView {
 				year = Integer.parseInt(jcomy.getSelectedItem().toString());
 				month = mycalemdar.getMonth().indexOf(jcomm.getSelectedItem().toString()) + 1;
 				showcalendar(month, Integer.parseInt(jcomy.getSelectedItem().toString()), time);
-				System.out.println(month + "<<<<<");
-				System.out.println(month + " " + year + "<<<<<<<");
 
 			}
 		});
 
 		bm = new JButton(mycalemdar.getStamonth());
+
 		next = new JButton(">>");
 		back = new JButton("<<");
+		final JTextField searchbar = new JTextField();
+		searchbar.setPreferredSize(new Dimension(100, 20));
+		searchbar.addActionListener(new  ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				e.getActionCommand();
+				frameevent.setVisible(true);
 
+				tae.setText(mycalemdar.searchBar(searchbar.getText()));	
+			}
+		});
 		panel.setLayout(new BorderLayout());
 		panel.add(panel2, BorderLayout.NORTH);
-		panel2.add(next, BorderLayout.EAST);
-		panel2.add(back, BorderLayout.WEST);
+		panel2.add(searchbar, BorderLayout.EAST);
+		// panel2.add(back, BorderLayout.WEST);
 		panel2.add(panelbut, BorderLayout.CENTER);
-
 		panel22 = new JPanel();
 		panel22.setLayout(new GridLayout(1, 7));
 		panel22.add(new JLabel("     Sunday"));
@@ -403,19 +404,23 @@ public class MainView {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				DateFormat dateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-				Date date;
+				framepop.setVisible(false);
+				if (!(ta.getText().equals(""))) {
+					DateFormat dateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+					Date date;
 
-				try {
-					date = dateTimeFormat.parse(day + "/" + month + "/" + year + " " + jth.getSelectedItem().toString()
-							+ ":" + jtm.getSelectedItem().toString());
-					if (!ta.getText().equals("")) {
-						mycalemdar.addDiary(date.getDay(), (event + " :" + ta.getText()));
+					try {
+						date = dateTimeFormat.parse(day + "/" + month + "/" + year + " "
+								+ jth.getSelectedItem().toString() + ":" + jtm.getSelectedItem().toString());
+						if (!ta.getText().equals("")) {
+							mycalemdar.addDiary(date.getDay(), (event + " :" + ta.getText()));
+						}
+					} catch (ParseException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
 					}
-				} catch (ParseException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
 				}
+
 			}
 		});
 
